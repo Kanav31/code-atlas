@@ -17,6 +17,7 @@ interface AuthContextValue {
   }) => Promise<void>;
   logout: () => Promise<void>;
   setAccessToken: (token: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,11 +71,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const { accessToken } = await api.login({ email, password });
-    localStorage.setItem('access_token', accessToken);
-    setLoggedInCookie();
-    await fetchUser();
-    router.push('/dashboard');
+    try {
+      const { accessToken } = await api.login({ email, password });
+      localStorage.setItem('access_token', accessToken);
+      setLoggedInCookie();
+      await fetchUser();
+      router.push('/dashboard');
+    } catch (err) {
+      // Re-throw with a friendlier message for unverified accounts
+      if (err instanceof Error && err.message === 'email_not_verified') {
+        throw new Error('Please verify your email address before logging in. Check your inbox.');
+      }
+      throw err;
+    }
   };
 
   const register = async (data: {
@@ -100,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setAccessToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, setAccessToken, refreshUser: fetchUser }}>
       {children}
     </AuthContext.Provider>
   );

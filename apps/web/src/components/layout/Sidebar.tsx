@@ -272,17 +272,15 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, beginn
           onClick={onToggle}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-expanded={!collapsed}
-          style={{ top: '10px' }}
+          style={{ top: '14px' }}
           className={cn(
             'absolute -right-3 z-20',
-            'flex items-center justify-center w-6 h-6 rounded-full',
-            'p-5',
-            'bg-[var(--bg1)] border border-[var(--line2)]',
-            'text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--line2)]',
-            'hover:bg-[var(--bg3)]',
-            'transition-colors duration-150',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-api)]',
-            'shadow-[0_1px_4px_rgba(0,0,0,0.4)]',
+            'flex items-center justify-center w-6 h-6 rounded-md',
+            'bg-[var(--bg2)] border border-[var(--line2)]',
+            'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--bg3)] hover:border-[var(--line)]',
+            'transition-all duration-150',
+            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--c-api)]',
+            'shadow-sm',
           )}
         >
           {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}

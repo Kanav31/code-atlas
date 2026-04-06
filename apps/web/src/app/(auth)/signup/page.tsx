@@ -2,16 +2,21 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { useToast } from '@/hooks/use-toast';
 
+type Step = 'form' | 'email-sent';
+
 export default function SignupPage() {
-  const { register } = useAuth();
+  const { setAccessToken } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +24,8 @@ export default function SignupPage() {
   const [confirm, setConfirm] = useState('');
   const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<Step>('form');
+  const [pendingToken, setPendingToken] = useState('');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +39,9 @@ export default function SignupPage() {
     }
     setLoading(true);
     try {
-      await register({ name, email, password, subscribeNewsletter: newsletter });
+      const { accessToken } = await api.register({ name, email, password, subscribeNewsletter: newsletter });
+      setPendingToken(accessToken);
+      setStep('email-sent');
     } catch (err) {
       toast({
         variant: 'destructive',
@@ -42,6 +51,75 @@ export default function SignupPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleContinue() {
+    setLoading(true);
+    try {
+      await setAccessToken(pendingToken);
+      router.push('/dashboard');
+    } catch {
+      toast({ variant: 'destructive', title: 'Something went wrong. Please log in.' });
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === 'email-sent') {
+    return (
+      <div className="bg-[var(--bg1)] border border-[var(--line)] rounded-xl p-8 text-center space-y-6">
+        {/* Animated envelope */}
+        <div className="flex items-center justify-center">
+          <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--c-api) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--c-api) 25%, transparent)' }}>
+            <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
+              <rect x="3" y="7" width="26" height="18" rx="3" stroke="var(--c-api)" strokeWidth="1.8" />
+              <path d="M3 11l13 9 13-9" stroke="var(--c-api)" strokeWidth="1.8" strokeLinecap="round" />
+              <circle cx="24" cy="8" r="4" fill="var(--c-api)" />
+              <path d="M22.5 8l1 1 2-2" stroke="var(--bg)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h1 className="text-xl font-bold font-heading text-[var(--text)] tracking-tight">
+            Check your inbox
+          </h1>
+          <p className="text-sm text-[var(--text2)] leading-relaxed">
+            We sent a verification link to
+          </p>
+          <p className="text-sm font-semibold text-[var(--text)] bg-[var(--bg3)] px-3 py-1.5 rounded-lg inline-block font-mono">
+            {email}
+          </p>
+          <p className="text-xs text-[var(--muted)] pt-1">
+            Click the link in the email to verify your account. You can continue using the app in the meantime.
+          </p>
+        </div>
+
+        {/* Skeleton-style progress bar */}
+        <div className="w-full h-1 rounded-full bg-[var(--bg3)] overflow-hidden">
+          <div className="h-full rounded-full bg-[var(--c-api)] animate-pulse" style={{ width: '100%', opacity: 0.6 }} />
+        </div>
+
+        <div className="space-y-3">
+          <Button className="w-full" onClick={handleContinue} disabled={loading}>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Setting up your account…
+              </span>
+            ) : (
+              'Continue to dashboard →'
+            )}
+          </Button>
+          <p className="text-xs text-[var(--muted)]">
+            Didn&apos;t receive it?{' '}
+            <span className="text-[var(--text2)]">Check your spam folder.</span>
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -137,7 +215,14 @@ export default function SignupPage() {
         </label>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              Creating account…
+            </span>
+          ) : (
+            'Create account'
+          )}
         </Button>
       </form>
 

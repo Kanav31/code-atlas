@@ -114,7 +114,30 @@ export default function ProfilePage() {
     await logout().catch(() => null);
   }
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto px-8 py-10 space-y-10">
+        <div className="space-y-2">
+          <div className="h-7 w-48 rounded-lg bg-[var(--bg3)] animate-pulse" />
+          <div className="h-4 w-64 rounded bg-[var(--bg3)] animate-pulse" />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-[var(--bg1)] border border-[var(--line)] rounded-xl p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[var(--bg3)] animate-pulse" />
+              <div className="h-3.5 w-24 rounded bg-[var(--bg3)] animate-pulse" />
+            </div>
+            <div className="h-px bg-[var(--line)]" />
+            <div className="space-y-3">
+              <div className="h-10 rounded-lg bg-[var(--bg3)] animate-pulse" />
+              <div className="h-10 rounded-lg bg-[var(--bg3)] animate-pulse opacity-70" />
+              <div className="h-8 w-28 rounded-lg bg-[var(--bg3)] animate-pulse opacity-50" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-8 py-10 space-y-10">

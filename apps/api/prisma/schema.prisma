@@ -31,9 +31,22 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   passwordResets       PasswordReset[]
+  verifyEmailTokens    VerifyEmailToken[]
   newsletterSubscriber NewsletterSubscriber?
 
   @@map("users")
+}
+
+model VerifyEmailToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verify_email_tokens")
 }
 
 model PasswordReset {

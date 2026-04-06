@@ -53,6 +53,9 @@ export const api = {
 
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
 
+  resendVerification: () =>
+    request<{ message: string }>('/auth/resend-verification', { method: 'POST' }),
+
   forgotPassword: (email: string) =>
     request<{ message: string }>('/auth/forgot-password', {
       method: 'POST',

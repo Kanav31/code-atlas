@@ -119,16 +119,30 @@ export class AuthController {
 
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string, @Res() res: Response) {
-    // In production, validate token from DB. Here we redirect with status.
     const frontendUrl = process.env['FRONTEND_URL'] ?? 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/verified?status=success`);
+    try {
+      await this.authService.verifyEmail(token);
+      res.redirect(`${frontendUrl}/auth/verified?status=success`);
+    } catch {
+      res.redirect(`${frontendUrl}/auth/verified?status=error`);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@CurrentUser() user: AuthenticatedUser) {
+    await this.authService.resendVerification(user.id, user.email);
+    return { message: 'Verification email sent' };
   }
 
   private setRefreshCookie(res: Response, token: string) {
+    const isProduction = process.env['NODE_ENV'] === 'production';
     res.cookie('refresh_token', token, {
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      // 'none' required for cross-origin (Vercel → Render) — must pair with secure:true
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }

@@ -35,7 +35,7 @@ export class NewsletterService {
       if (user) name = user.name;
     }
 
-    await this.mail.sendNewsletterWelcome(email, name, subscriber.unsubscribeToken);
+    void this.mail.sendNewsletterWelcome(email, name, subscriber.unsubscribeToken);
     return subscriber;
   }
 

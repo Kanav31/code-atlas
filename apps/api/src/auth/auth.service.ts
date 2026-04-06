@@ -31,6 +31,9 @@ export class AuthService {
     if (!user || !user.passwordHash) throw new UnauthorizedException('Invalid credentials');
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('email_not_verified');
+    }
     return user;
   }
 
@@ -46,10 +49,7 @@ export class AuthService {
       provider: Provider.LOCAL,
     });
 
-    const verifyToken = uuidv4();
-    // Store verify token temporarily — for simplicity, we send it directly in email
-    // In production you'd store it in a VerifyEmailToken table
-    await this.mail.sendEmailVerification(user.email, user.name, verifyToken);
+    await this.createAndSendVerificationToken(user.id, user.email, user.name);
 
     if (dto.subscribeNewsletter) {
       await this.newsletter.subscribe(user.email, user.id);
@@ -78,6 +78,21 @@ export class AuthService {
     return this.issueTokens(user.id, user.email);
   }
 
+  async verifyEmail(token: string) {
+    const record = await this.prisma.verifyEmailToken.findUnique({ where: { token } });
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired verification link');
+    }
+    await this.users.update(record.userId, { emailVerified: true });
+    await this.prisma.verifyEmailToken.deleteMany({ where: { userId: record.userId } });
+  }
+
+  async resendVerification(userId: string, email: string) {
+    const user = await this.users.findById(userId);
+    if (!user || user.emailVerified) return; // already verified, silently ignore
+    await this.createAndSendVerificationToken(userId, email, user.name);
+  }
+
   async forgotPassword(email: string) {
     const user = await this.users.findByEmail(email);
     // Always return success to prevent email enumeration
@@ -90,7 +105,7 @@ export class AuthService {
       data: { userId: user.id, token, expiresAt },
     });
 
-    await this.mail.sendPasswordReset(user.email, user.name, token);
+    void this.mail.sendPasswordReset(user.email, user.name, token);
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -119,6 +134,20 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
     return this.issueTokens(userId, email);
+  }
+
+  private async createAndSendVerificationToken(userId: string, email: string, name: string) {
+    // Delete any existing token for this user
+    await this.prisma.verifyEmailToken.deleteMany({ where: { userId } });
+
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.prisma.verifyEmailToken.create({
+      data: { userId, token, expiresAt },
+    });
+
+    void this.mail.sendEmailVerification(email, name, token);
   }
 
   private async issueTokens(userId: string, email: string) {
