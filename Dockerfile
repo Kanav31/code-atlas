@@ -1,44 +1,22 @@
-# ─── Stage 1: Build ───────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 RUN npm install -g pnpm@9
 
 WORKDIR /app
 
-# Copy workspace manifests first — maximises layer cache
+# Copy workspace manifests first — layer cache for installs
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml tsconfig.base.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 
-# Install all deps (including devDeps needed for build)
-# --no-frozen-lockfile allows pnpm to resolve platform-specific native binaries
-# (lockfile was generated on macOS; Render builds on Linux)
 RUN pnpm install --no-frozen-lockfile
 
-# Copy all source
+# Copy source after install so code changes don't bust the dep cache
 COPY packages/shared/ ./packages/shared/
 COPY apps/api/ ./apps/api/
 
-# Generate Prisma client, then compile NestJS
-RUN pnpm --filter @code-atlas/api exec prisma generate
-RUN pnpm --filter @code-atlas/api build
-
-# ─── Stage 2: Run ─────────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Copy the pnpm virtual store + per-package node_modules symlinks from builder.
-# Both must live at the same absolute paths so symlinks resolve correctly.
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-
-# Compiled NestJS output
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-
-# package.json (needed by Node module resolution) + prisma schema
-COPY --from=builder /app/apps/api/package.json ./apps/api/
-COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+RUN pnpm --filter @code-atlas/api exec prisma generate && \
+    pnpm --filter @code-atlas/api build
 
 WORKDIR /app/apps/api
 
