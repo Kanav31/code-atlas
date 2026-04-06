@@ -17,14 +17,17 @@ interface TerminalProps {
 }
 
 export function Terminal({ lines, className }: TerminalProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only within the terminal box — never the page
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [lines]);
 
   return (
     <div
+      ref={scrollRef}
       className={cn(
         'bg-[var(--bg)] rounded-lg border border-[var(--line)] font-mono overflow-y-auto',
         className,
@@ -57,7 +60,6 @@ export function Terminal({ lines, className }: TerminalProps) {
             <span className="text-[11px] text-[var(--text2)] break-words flex-1">{line.message}</span>
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
     </div>
   );
