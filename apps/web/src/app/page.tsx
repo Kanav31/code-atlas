@@ -69,7 +69,7 @@ const KEYFRAMES = `
 
 export default function LandingPage() {
   const cookieStore = cookies();
-  const isLoggedIn = cookieStore.has('refresh_token');
+  const isLoggedIn = cookieStore.has('logged_in');
 
   return (
     <div style={{ background: '#080c10', color: '#fff', minHeight: '100vh', position: 'relative' }}>

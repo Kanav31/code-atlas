@@ -10,7 +10,7 @@ export default function DashboardHomeLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = cookies();
-  if (!cookieStore.has('refresh_token')) {
+  if (!cookieStore.has('logged_in')) {
     redirect('/login');
   }
 
