@@ -14,7 +14,7 @@ const PUBLIC_PATHS = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('refresh_token')?.value;
+  const token = request.cookies.get('logged_in')?.value;
 
   const isPublic = PUBLIC_PATHS.some((p) =>
     p === '/'

@@ -31,16 +31,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!token) { setLoading(false); return; }
     try {
       const data = await api.getMe();
+      document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
       setUser(data);
     } catch {
       // Token invalid or expired — try refresh
       try {
         const { accessToken } = await api.refresh();
         localStorage.setItem('access_token', accessToken);
+        document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
         const data = await api.getMe();
         setUser(data);
       } catch {
         localStorage.removeItem('access_token');
+        document.cookie = 'logged_in=; path=/; max-age=0; SameSite=lax';
         setUser(null);
       }
     } finally {
@@ -52,14 +55,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUser();
   }, [fetchUser]);
 
+  const setLoggedInCookie = () => {
+    document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
+  };
+
+  const clearLoggedInCookie = () => {
+    document.cookie = 'logged_in=; path=/; max-age=0; SameSite=lax';
+  };
+
   const setAccessToken = async (token: string) => {
     localStorage.setItem('access_token', token);
+    setLoggedInCookie();
     await fetchUser();
   };
 
   const login = async (email: string, password: string) => {
     const { accessToken } = await api.login({ email, password });
     localStorage.setItem('access_token', accessToken);
+    setLoggedInCookie();
     await fetchUser();
     router.push('/dashboard');
   };
@@ -72,15 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     const { accessToken } = await api.register(data);
     localStorage.setItem('access_token', accessToken);
+    setLoggedInCookie();
     await fetchUser();
     router.push('/dashboard');
   };
 
   const logout = async () => {
-    // Clear the httpOnly refresh_token cookie via Next.js route handler
-    // (works even when the NestJS backend is unreachable)
+    clearLoggedInCookie();
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
-    // Best-effort: also tell backend to invalidate the token server-side
     await api.logout().catch(() => null);
     localStorage.removeItem('access_token');
     setUser(null);
