@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg:    #06060a;
+  --bg1:   #0c0c12;
+  --bg2:   #12121a;
+  --bg3:   #18181f;
+  --line:  #1e1e28;
+  --line2: #2a2a38;
+  --muted: #52526a;
+  --dim:   #3a3a50;
+  --text:  #e8e8f2;
+  --text2: #b0b0c8;
+
+  --c-api:   #34d399;
+  --c-rt:    #f59e0b;
+  --c-queue: #e879f9;
+  --c-db:    #60a5fa;
+  --c-scale: #f87171;
+  --c-cache: #a78bfa;
+
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* No italics — use weight for emphasis */
+em, i { font-style: normal; font-weight: 600; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg1); }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Code highlighting */
+.syntax-kw  { color: #c084fc; }
+.syntax-str { color: #86efac; }
+.syntax-cm  { color: #52526a; }
+.syntax-fn  { color: #67e8f9; }
+.syntax-num { color: #fbbf24; }
+.syntax-key { color: #60a5fa; }
+
+/* Playground terminal */
+.terminal-line {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  animation: fadeUp 0.25s ease forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0px currentColor; }
+  50%       { box-shadow: 0 0 14px currentColor; }
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-4px); }
+}
+
+/* Landing nav sign-out button hover */
+.landing-nav-signout-btn { transition: background 120ms ease, color 120ms ease; }
+.landing-nav-signout-btn:hover { background: rgba(239,68,68,0.08) !important; color: #f87171 !important; }
+
+/* Content width zone — expands automatically when sidebar is collapsed */
+.content-zone {
+  width: 100%;
+  max-width: 1024px; /* matches Tailwind max-w-5xl */
+  margin-left: auto;
+  margin-right: auto;
+  transition: max-width 0.2s ease;
+}
+main[data-collapsed="true"] .content-zone {
+  max-width: 100%;
+}

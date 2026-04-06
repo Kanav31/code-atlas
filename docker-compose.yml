@@ -1,0 +1,11 @@
+# Docker Postgres removed — database is now Supabase (see apps/api/.env.example).
+# For local dev, point DATABASE_URL + DIRECT_URL at your Supabase project.
+
+services:
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: code-atlas-mail
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP — point your app here
+      - "8025:8025"   # Web UI — view sent emails at http://localhost:8025

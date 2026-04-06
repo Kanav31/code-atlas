@@ -1,0 +1,41 @@
+{
+  "name": "code-atlas",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "lint": "pnpm --recursive lint",
+    "type-check": "pnpm --recursive type-check",
+    "clean": "pnpm --recursive --parallel exec rm -rf .next dist node_modules/.cache",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d",
+    "db:migrate": "pnpm --filter api exec prisma migrate dev",
+    "db:studio": "pnpm --filter api exec prisma studio",
+    "agent:security": "node scripts/agent-security.js",
+    "agent:review": "node scripts/agent-review.js",
+    "agent:client": "node scripts/agent-client.js",
+    "agent:all": "node scripts/agent-security.js && node scripts/agent-review.js && node scripts/agent-client.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "prisma",
+      "unrs-resolver"
+    ],
+    "overrides": {
+      "multer": "^2.0.0",
+      "brace-expansion": "2.0.3"
+    }
+  }
+}
