@@ -279,7 +279,7 @@ export function RtPlayground() {
     setChatMsgs((prev) => {
       const copy = [...prev];
       const last = copy.findLastIndex((m) => m.side === 'right');
-      if (last !== -1) copy[last] = { ...copy[last], delivered: true };
+      if (last !== -1) copy[last] = { ...copy[last], delivered: true } as ChatMsg;
       return copy;
     });
 

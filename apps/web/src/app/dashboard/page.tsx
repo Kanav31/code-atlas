@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, Radio, Layers, Database, Server, HardDrive } from 'lucide-react';
+import { Zap, Radio, Layers, Database, Server, HardDrive, type LucideIcon } from 'lucide-react';
 import { useBeginnerModeContext } from '@/lib/beginner-mode-context';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ interface NodeDef {
   y: number;
   delay: string;
   href: string;
-  Icon: React.ComponentType<{ size?: number; color?: string }>;
+  Icon: LucideIcon;
   order: number;
   prerequisiteLabel: string;
 }
@@ -121,6 +121,7 @@ export default function DashboardHomePage() {
       if (cancelRef.current) return;
 
       const conn = CONNECTIONS[pairIndex % CONNECTIONS.length];
+      if (!conn) { scheduleTimer = setTimeout(firePacket, 900); return; }
       pairIndex++;
 
       const fromNode = NODES.find((n) => n.id === conn.from);
@@ -142,7 +143,7 @@ export default function DashboardHomePage() {
       circle.setAttribute('fill', fromNode.color);
       circle.setAttribute('cx', String(x0));
       circle.setAttribute('cy', String(y0));
-      svg.appendChild(circle);
+      svgRef.current!.appendChild(circle);
 
       const startTime = performance.now();
       const duration  = 1400;

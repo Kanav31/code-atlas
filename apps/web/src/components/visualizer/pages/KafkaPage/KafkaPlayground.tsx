@@ -120,7 +120,7 @@ export function KafkaPlayground() {
 
     // Capture current offset before state update
     let currentOffset = 0;
-    setOffsets((prev) => { currentOffset = prev[partition]; return prev; });
+    setOffsets((prev) => { currentOffset = prev[partition] ?? 0; return prev; });
     await sleep(10); // let state settle
 
     // ── Phase 1: Producer ─────────────────────────────────────────────────────
