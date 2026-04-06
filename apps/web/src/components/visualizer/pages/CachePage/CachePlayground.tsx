@@ -241,7 +241,7 @@ export function CachePlayground() {
   const examples = EXAMPLES[mode];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <ScoreToast message={scoreMsg} accentColor={COLOR} />
 
       {/* Expanded log overlay */}
@@ -282,7 +282,7 @@ export function CachePlayground() {
         </div>
       )}
 
-      <div className="flex-1 p-6 flex flex-col gap-3 overflow-hidden">
+      <div className="p-6 flex flex-col gap-3">
         {/* Example chips */}
         <div className="grid grid-cols-2 gap-2 flex-shrink-0">
           {examples.map((ex) => (
@@ -312,7 +312,7 @@ export function CachePlayground() {
         </div>
 
         {/* Visualizer card */}
-        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col">
           {/* Chrome bar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--line)] bg-[var(--bg2)] flex-shrink-0">
             <div className="flex items-center gap-2">
@@ -382,7 +382,7 @@ export function CachePlayground() {
           <StepBar total={step.total} current={step.current} label={step.label} accentColor={COLOR} />
 
           {/* Cache slot grid */}
-          <div className="flex-1 overflow-y-auto p-3">
+          <div className="overflow-y-auto max-h-52 p-3">
             <div className="grid grid-cols-4 gap-2">
               {cacheEntries.map(([k, v]) => (
                 <div key={k}

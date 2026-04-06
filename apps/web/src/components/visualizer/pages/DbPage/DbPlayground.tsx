@@ -265,7 +265,7 @@ export function DbPlayground() {
   const modeLabel = mode === 'scan' ? 'seq scan' : mode === 'index' ? 'index scan' : 'ACID txn';
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <ScoreToast message={scoreMsg} accentColor={COLOR} />
 
       {/* Expanded log overlay */}
@@ -311,7 +311,7 @@ export function DbPlayground() {
         </div>
       )}
 
-      <div className="flex-1 p-6 flex flex-col gap-4 overflow-hidden">
+      <div className="p-6 flex flex-col gap-4">
         {/* Example chips */}
         <div className="grid grid-cols-2 gap-2 flex-shrink-0">
           {examples.map((ex) => (
@@ -339,7 +339,7 @@ export function DbPlayground() {
         </div>
 
         {/* Visualizer card */}
-        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col">
           {/* Chrome bar */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--line)] bg-[var(--bg2)] flex-shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
@@ -423,7 +423,7 @@ export function DbPlayground() {
           <StepBar total={step.total} current={step.current} label={step.label} accentColor={COLOR} />
 
           {/* Table / account visualization */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="overflow-y-auto max-h-52">
             {mode !== 'acid' ? (
               <div className="p-3 space-y-1">
                 {DB_ROWS.map((row) => (
@@ -521,6 +521,7 @@ export function DbPlayground() {
         visible={!busy && lines.length > 0 && beginnerMode}
       />
 
+      <div className="sticky bottom-0 z-10">
       <InputBar
         modes={[{ id: 'scan', label: 'Full Scan' }, { id: 'index', label: 'B-tree Index' }, { id: 'acid', label: 'ACID Txn' }]}
         activeMode={mode}
@@ -541,6 +542,7 @@ export function DbPlayground() {
         disabled={busy}
         accentColor={COLOR}
       />
+      </div>
     </div>
   );
 }

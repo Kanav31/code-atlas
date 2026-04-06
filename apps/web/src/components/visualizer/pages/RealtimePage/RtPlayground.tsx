@@ -359,12 +359,12 @@ export function RtPlayground() {
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <ScoreToast message={scoreMsg} accentColor={COLOR} />
 
-      <div className="flex-1 p-6 flex flex-col gap-3 min-h-0">
+      <div className="p-6 flex flex-col gap-3">
         {/* Visualization box */}
-        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col">
           {/* Chrome bar */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--line)] bg-[var(--bg2)] flex-shrink-0">
             <div className="w-3 h-3 rounded-full bg-red-500/50" />
@@ -506,7 +506,7 @@ export function RtPlayground() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3" style={{ background: 'var(--bg)' }}>
+              <div className="overflow-y-auto max-h-60 px-3 py-3 space-y-3" style={{ background: 'var(--bg)' }}>
                 {chatMsgs.length === 0 && (
                   <p className="text-center text-[10px] font-mono text-[var(--muted)] pt-8">
                     Click an example below to open the WebSocket tunnel and join the chat.
@@ -622,7 +622,7 @@ export function RtPlayground() {
             </div>
           ) : (
             <div className="relative mx-4 my-3">
-              <Terminal lines={lines} className="h-36 border-[var(--line)]" />
+              <Terminal lines={lines} className="max-h-52 border-[var(--line)]" />
               <button
                 type="button"
                 onClick={() => setLogsExpanded(true)}
@@ -740,6 +740,7 @@ export function RtPlayground() {
         </div>
       </div>
 
+      <div className="sticky bottom-0 z-10">
       <InputBar
         modes={[
           { id: 'short', label: 'Short Poll' },
@@ -759,7 +760,7 @@ export function RtPlayground() {
         disabled={busy}
         accentColor={COLOR}
       />
-
+      </div>
     </div>
   );
 }

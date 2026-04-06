@@ -247,7 +247,7 @@ export function ScalePlayground() {
   const modeLabel = mode === 'lb' ? 'load balancer' : mode === 'replica' ? 'replication' : 'sharding';
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <ScoreToast message={scoreMsg} accentColor={COLOR} />
 
       {/* Expanded log overlay */}
@@ -293,7 +293,7 @@ export function ScalePlayground() {
         </div>
       )}
 
-      <div className="flex-1 p-6 flex flex-col gap-4 overflow-hidden">
+      <div className="p-6 flex flex-col gap-4">
         {/* Example chips */}
         <div className="grid grid-cols-2 gap-2 flex-shrink-0">
           {examples.map((ex) => (
@@ -321,7 +321,7 @@ export function ScalePlayground() {
         </div>
 
         {/* Visualizer card */}
-        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="bg-[var(--bg1)] rounded-xl border border-[var(--line)] overflow-hidden flex flex-col">
           {/* Chrome bar */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--line)] bg-[var(--bg2)] flex-shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
@@ -405,7 +405,7 @@ export function ScalePlayground() {
           <StepBar total={step.total} current={step.current} label={step.label} accentColor={COLOR} />
 
           {/* Visualization panels */}
-          <div className="flex-1 overflow-y-auto p-4 pt-3">
+          <div className="overflow-y-auto max-h-52 p-4 pt-3">
             {mode === 'lb' && (
               <div className="grid grid-cols-3 gap-3">
                 {lbCounters.map((count, i) => (
@@ -505,6 +505,7 @@ export function ScalePlayground() {
         visible={!busy && lines.length > 0 && beginnerMode}
       />
 
+      <div className="sticky bottom-0 z-10">
       <InputBar
         modes={[{ id: 'lb', label: 'Load Balancer' }, { id: 'replica', label: 'Replication' }, { id: 'shard', label: 'Sharding' }]}
         activeMode={mode}
@@ -524,6 +525,7 @@ export function ScalePlayground() {
         disabled={busy}
         accentColor={COLOR}
       />
+      </div>
     </div>
   );
 }
