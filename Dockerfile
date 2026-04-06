@@ -1,7 +1,7 @@
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9
 
 WORKDIR /app
 
@@ -11,7 +11,9 @@ COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 
 # Install all deps (including devDeps needed for build)
-RUN pnpm install --frozen-lockfile
+# --no-frozen-lockfile allows pnpm to resolve platform-specific native binaries
+# (lockfile was generated on macOS; Render builds on Linux)
+RUN pnpm install --no-frozen-lockfile
 
 # Copy all source
 COPY packages/shared/ ./packages/shared/
