@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 /** Escape user-controlled strings before interpolating into HTML email templates. */
 function esc(s: string): string {
@@ -14,7 +14,7 @@ function esc(s: string): string {
 
 @Injectable()
 export class MailService {
-  private readonly transporter: nodemailer.Transporter;
+  private readonly resend: Resend;
   private readonly logger = new Logger(MailService.name);
   private readonly from: string;
   private readonly frontendUrl: string;
@@ -23,18 +23,8 @@ export class MailService {
   constructor(private readonly config: ConfigService) {
     this.frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
     this.apiUrl = config.get<string>('API_URL', 'http://localhost:3001');
-
-    const mailUser = config.get<string>('MAIL_USER');
-    const mailPass = config.get<string>('MAIL_PASS');
-    this.from = config.get<string>('MAIL_FROM') ?? (mailUser ? `Code Atlas <${mailUser}>` : 'Code Atlas <agarwalkanav3108@gmail.com>');
-
-    const port = Number(config.get<string>('MAIL_PORT', '1025'));
-    this.transporter = nodemailer.createTransport({
-      host: config.get<string>('MAIL_HOST', 'localhost'),
-      port,
-      secure: port === 465,
-      ...(mailUser && mailPass ? { auth: { user: mailUser, pass: mailPass } } : {}),
-    });
+    this.from = config.get<string>('MAIL_FROM', 'Code Atlas <onboarding@resend.dev>');
+    this.resend = new Resend(config.getOrThrow<string>('RESEND_API_KEY'));
   }
 
   async sendEmailVerification(email: string, name: string, token: string) {
@@ -80,10 +70,14 @@ export class MailService {
   }
 
   private async send(options: { to: string; subject: string; html: string }) {
-    try {
-      await this.transporter.sendMail({ from: this.from, ...options });
-    } catch (err) {
-      this.logger.error(`Failed to send email to ${options.to}`, err);
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+    });
+    if (error) {
+      this.logger.error(`Failed to send email to ${options.to}: ${error.message}`);
     }
   }
 
