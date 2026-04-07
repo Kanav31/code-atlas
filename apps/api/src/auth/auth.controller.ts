@@ -64,7 +64,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = (req.cookies as Record<string, string>)['refresh_token'] ?? '';
+    await this.authService.logout(refreshToken);
     res.clearCookie('refresh_token');
     return { message: 'Logged out successfully' };
   }
@@ -143,7 +145,7 @@ export class AuthController {
       secure: isProduction,
       // 'none' required for cross-origin (Vercel → Render) — must pair with secure:true
       sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
   }
 }

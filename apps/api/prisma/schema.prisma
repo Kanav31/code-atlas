@@ -32,6 +32,7 @@ model User {
 
   passwordResets       PasswordReset[]
   verifyEmailTokens    VerifyEmailToken[]
+  refreshTokens        RefreshToken[]
   newsletterSubscriber NewsletterSubscriber?
 
   @@map("users")
@@ -60,6 +61,18 @@ model PasswordReset {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_resets")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
 }
 
 model NewsletterSubscriber {

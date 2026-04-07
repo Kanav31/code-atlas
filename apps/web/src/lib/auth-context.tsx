@@ -32,14 +32,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!token) { setLoading(false); return; }
     try {
       const data = await api.getMe();
-      document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
+      document.cookie = 'logged_in=1; path=/; max-age=2592000; SameSite=lax';
       setUser(data);
     } catch {
       // Token invalid or expired — try refresh
       try {
         const { accessToken } = await api.refresh();
         localStorage.setItem('access_token', accessToken);
-        document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
+        document.cookie = 'logged_in=1; path=/; max-age=2592000; SameSite=lax';
         const data = await api.getMe();
         setUser(data);
       } catch {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchUser]);
 
   const setLoggedInCookie = () => {
-    document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
+    document.cookie = 'logged_in=1; path=/; max-age=2592000; SameSite=lax';
   };
 
   const clearLoggedInCookie = () => {

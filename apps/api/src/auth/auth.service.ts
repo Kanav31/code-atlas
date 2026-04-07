@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { createHash } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
@@ -14,6 +15,9 @@ import { NewsletterService } from '../newsletter/newsletter.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { Provider } from '@prisma/client';
+
+const REFRESH_TOKEN_TTL_DAYS = 30;
+const REFRESH_TOKEN_TTL_MS = REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
@@ -89,13 +93,12 @@ export class AuthService {
 
   async resendVerification(userId: string, email: string) {
     const user = await this.users.findById(userId);
-    if (!user || user.emailVerified) return; // already verified, silently ignore
+    if (!user || user.emailVerified) return;
     await this.createAndSendVerificationToken(userId, email, user.name);
   }
 
   async forgotPassword(email: string) {
     const user = await this.users.findByEmail(email);
-    // Always return success to prevent email enumeration
     if (!user || user.provider !== Provider.LOCAL) return;
 
     const token = uuidv4();
@@ -128,16 +131,34 @@ export class AuthService {
 
   async refreshTokens(userId: string, email: string, refreshToken: string) {
     const secret = this.config.getOrThrow<string>('JWT_REFRESH_SECRET');
+
+    // Verify JWT signature and expiry
     try {
       this.jwt.verify(refreshToken, { secret });
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+
+    // Verify token exists in DB (rotation check — each token is single-use)
+    const tokenHash = this.hashToken(refreshToken);
+    const stored = await this.prisma.refreshToken.findUnique({ where: { tokenHash } });
+    if (!stored || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token revoked or expired');
+    }
+
+    // Delete used token (rotation — prevents replay attacks)
+    await this.prisma.refreshToken.delete({ where: { tokenHash } });
+
     return this.issueTokens(userId, email);
   }
 
+  async logout(refreshToken: string) {
+    if (!refreshToken) return;
+    const tokenHash = this.hashToken(refreshToken);
+    await this.prisma.refreshToken.deleteMany({ where: { tokenHash } });
+  }
+
   private async createAndSendVerificationToken(userId: string, email: string, name: string) {
-    // Delete any existing token for this user
     await this.prisma.verifyEmailToken.deleteMany({ where: { userId } });
 
     const token = uuidv4();
@@ -152,11 +173,24 @@ export class AuthService {
 
   private async issueTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
-    const accessToken = this.jwt.sign(payload);
+    const accessToken = this.jwt.sign(payload); // 15 min (configured in module)
+
     const refreshToken = this.jwt.sign(payload, {
       secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
-      expiresIn: '7d',
+      expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d`,
     });
+
+    // Store hashed refresh token in DB for rotation
+    const tokenHash = this.hashToken(refreshToken);
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
+    await this.prisma.refreshToken.create({
+      data: { userId, tokenHash, expiresAt },
+    });
+
     return { accessToken, refreshToken };
+  }
+
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
   }
 }
