@@ -26,10 +26,31 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Code Atlas — Interactive Systems Engineering',
+  metadataBase: new URL('https://code-atlas-web.vercel.app'),
+  title: {
+    default: 'Code Atlas — Interactive Systems Engineering',
+    template: '%s | Code Atlas',
+  },
   description:
     'Learn backend and distributed systems concepts through interactive visualizers, animated simulations, and curated interview prep.',
   keywords: ['system design', 'backend engineering', 'APIs', 'Kafka', 'databases', 'caching'],
+  openGraph: {
+    type: 'website',
+    siteName: 'Code Atlas',
+    title: 'Code Atlas — Interactive Systems Engineering',
+    description:
+      'Learn backend and distributed systems concepts through interactive visualizers, animated simulations, and curated interview prep.',
+    url: 'https://code-atlas-web.vercel.app',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Code Atlas — Interactive Systems Engineering',
+    description:
+      'Learn backend and distributed systems concepts through interactive visualizers, animated simulations, and curated interview prep.',
+  },
+  alternates: {
+    canonical: 'https://code-atlas-web.vercel.app',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

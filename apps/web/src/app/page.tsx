@@ -697,7 +697,7 @@ export default function LandingPage() {
               fontFamily: 'var(--font-dm-mono), monospace',
             }}
           >
-            © 2025 Code Atlas. Built for engineers who learn by doing.
+            © {new Date().getFullYear()} Code Atlas. Built for engineers who learn by doing.
           </p>
         </div>
       </footer>

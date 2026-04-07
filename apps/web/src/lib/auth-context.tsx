@@ -8,7 +8,7 @@ import type { User } from '@code-atlas/shared';
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
   register: (data: {
     name: string;
     email: string;
@@ -70,15 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await fetchUser();
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, redirectTo = '/dashboard') => {
     try {
       const { accessToken } = await api.login({ email, password });
       localStorage.setItem('access_token', accessToken);
       setLoggedInCookie();
       await fetchUser();
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (err) {
-      // Re-throw with a friendlier message for unverified accounts
       if (err instanceof Error && err.message === 'email_not_verified') {
         throw new Error('Please verify your email address before logging in. Check your inbox.');
       }
