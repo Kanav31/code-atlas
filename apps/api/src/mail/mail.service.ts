@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 
 /** Escape user-controlled strings before interpolating into HTML email templates. */
 function esc(s: string): string {
@@ -14,26 +13,18 @@ function esc(s: string): string {
 
 @Injectable()
 export class MailService {
-  private readonly transporter: nodemailer.Transporter;
   private readonly logger = new Logger(MailService.name);
-  private readonly from: string;
+  private readonly apiKey: string;
+  private readonly senderEmail: string;
+  private readonly senderName = 'Code Atlas';
   private readonly frontendUrl: string;
   private readonly apiUrl: string;
 
   constructor(private readonly config: ConfigService) {
     this.frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
     this.apiUrl = config.get<string>('API_URL', 'http://localhost:3001');
-
-    const mailUser = config.getOrThrow<string>('MAIL_USER');
-    const mailPass = config.getOrThrow<string>('MAIL_PASS');
-    this.from = config.get<string>('MAIL_FROM', `Code Atlas <${mailUser}>`);
-
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 587,
-      secure: false,
-      auth: { user: mailUser, pass: mailPass },
-    });
+    this.apiKey = config.getOrThrow<string>('BREVO_API_KEY');
+    this.senderEmail = config.getOrThrow<string>('MAIL_USER');
   }
 
   async sendEmailVerification(email: string, name: string, token: string) {
@@ -80,7 +71,24 @@ export class MailService {
 
   private async send(options: { to: string; subject: string; html: string }) {
     try {
-      await this.transporter.sendMail({ from: this.from, ...options });
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': this.apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: this.senderName, email: this.senderEmail },
+          to: [{ email: options.to }],
+          subject: options.subject,
+          htmlContent: options.html,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.text();
+        this.logger.error(`Failed to send email to ${options.to}: ${res.status} ${body}`);
+      }
     } catch (err) {
       this.logger.error(`Failed to send email to ${options.to}: ${(err as Error).message}`);
     }
