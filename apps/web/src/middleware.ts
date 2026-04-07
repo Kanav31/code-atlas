@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   '/reset-password',
   '/verify-email',
   '/auth/callback',
+  '/auth/verified',
   '/unsubscribed',
 ];
 

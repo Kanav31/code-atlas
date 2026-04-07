@@ -1,12 +1,39 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function VerifiedContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const status = params.get('status');
   const success = status === 'success';
+  const [autoLoggingIn, setAutoLoggingIn] = useState(success);
+
+  useEffect(() => {
+    if (!success) return;
+
+    api.refresh()
+      .then(({ accessToken }) => {
+        localStorage.setItem('access_token', accessToken);
+        document.cookie = 'logged_in=1; path=/; max-age=604800; SameSite=lax';
+        router.replace('/dashboard');
+      })
+      .catch(() => {
+        // Refresh token missing or expired — user needs to log in manually
+        setAutoLoggingIn(false);
+      });
+  }, [success, router]);
+
+  if (autoLoggingIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
+        <div className="w-8 h-8 border-2 border-[var(--c-api)] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] px-4">
@@ -57,16 +84,16 @@ export default function VerifiedContent() {
             </h1>
             <p className="text-sm text-[var(--text2)] leading-relaxed">
               {success
-                ? 'Your email has been verified. You can now log in and access Code Atlas.'
+                ? 'Your email has been verified. Taking you to Code Atlas...'
                 : 'This verification link is invalid or has expired. Please request a new one by logging in.'}
             </p>
           </div>
 
           <Link
-            href={success ? '/login' : '/login'}
+            href="/login"
             className="w-full flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-medium bg-[var(--c-api)] text-[var(--bg)] hover:opacity-90 transition-opacity"
           >
-            {success ? 'Go to login →' : 'Back to login'}
+            {success ? 'Sign in →' : 'Back to login'}
           </Link>
         </div>
       </div>
