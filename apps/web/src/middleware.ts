@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   '/auth/callback',
   '/auth/verified',
   '/unsubscribed',
+  '/opengraph-image',
 ];
 
 export function middleware(request: NextRequest) {
