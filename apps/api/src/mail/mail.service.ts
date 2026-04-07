@@ -21,16 +21,18 @@ export class MailService {
   private readonly apiUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    this.from = config.get<string>('MAIL_FROM', 'Code Atlas <noreply@codeatlas.dev>');
     this.frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
     this.apiUrl = config.get<string>('API_URL', 'http://localhost:3001');
 
     const mailUser = config.get<string>('MAIL_USER');
     const mailPass = config.get<string>('MAIL_PASS');
+    this.from = config.get<string>('MAIL_FROM') ?? (mailUser ? `Code Atlas <${mailUser}>` : 'Code Atlas <agarwalkanav3108@gmail.com>');
 
+    const port = Number(config.get<string>('MAIL_PORT', '1025'));
     this.transporter = nodemailer.createTransport({
       host: config.get<string>('MAIL_HOST', 'localhost'),
-      port: config.get<number>('MAIL_PORT', 1025),
+      port,
+      secure: port === 465,
       ...(mailUser && mailPass ? { auth: { user: mailUser, pass: mailPass } } : {}),
     });
   }
