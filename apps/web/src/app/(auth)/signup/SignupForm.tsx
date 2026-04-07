@@ -145,6 +145,7 @@ export default function SignupForm() {
             onChange={(e) => setName(e.target.value)}
             required
             minLength={2}
+            autoComplete="name"
           />
         </div>
 
@@ -157,6 +158,7 @@ export default function SignupForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
         </div>
 
@@ -170,6 +172,7 @@ export default function SignupForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            autoComplete="new-password"
           />
         </div>
 
@@ -182,6 +185,7 @@ export default function SignupForm() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
+            autoComplete="new-password"
           />
         </div>
 

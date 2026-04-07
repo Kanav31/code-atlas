@@ -45,9 +45,9 @@ export default function ForgotPasswordForm() {
           <p className="text-xs text-[var(--muted)]">
             The link expires in 1 hour. Check your spam folder if you don&apos;t see it.
           </p>
-          <Link href="/login">
-            <Button variant="secondary" className="w-full mt-2">Back to login</Button>
-          </Link>
+          <Button variant="secondary" className="w-full mt-2" asChild>
+            <Link href="/login">Back to login</Link>
+          </Button>
         </div>
       ) : (
         <>

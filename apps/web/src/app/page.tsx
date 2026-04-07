@@ -671,7 +671,7 @@ export default function LandingPage() {
               Get started
             </Link>
             <a
-              href="https://github.com"
+              href="https://github.com/Kanav31/code-atlas"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
