@@ -41,12 +41,14 @@ export const metadata: Metadata = {
     description:
       'Learn backend and distributed systems concepts through interactive visualizers, animated simulations, and curated interview prep.',
     url: 'https://code-atlas-web.vercel.app',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Code Atlas — Interactive Systems Engineering',
     description:
       'Learn backend and distributed systems concepts through interactive visualizers, animated simulations, and curated interview prep.',
+    images: ['/opengraph-image'],
   },
   alternates: {
     canonical: 'https://code-atlas-web.vercel.app',
